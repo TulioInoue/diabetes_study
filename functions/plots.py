@@ -270,3 +270,36 @@ def plot_histogram(
         fontweight = "bold",
         pad = title.get("pady", 0),
     )
+
+def plot_violin(
+    ax: Axes,
+    data: list[float],
+    colors: list[str] | None,
+    title: TextConfig
+) -> None: 
+    
+    parts = ax.violinplot(
+        dataset = data,
+        showmeans = True,
+        showextrema = True,
+        side = "both",
+    )
+
+    parts["cmaxes"].set_color("gray")
+    parts["cmins"].set_color("gray")
+    parts["cbars"].set_color("gray")
+
+    if colors != None:
+        for i, pc in enumerate(parts['bodies']):
+            pc.set_facecolor(colors[i])
+            pc.set_edgecolor('black')
+
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.set_title(
+        label = title.get("text", "title"),
+        fontsize = title.get("size", 12),
+        fontname = title.get("font", "arial"),
+        fontweight = "bold",
+        pad = title.get("pady", 0),
+    )
+
