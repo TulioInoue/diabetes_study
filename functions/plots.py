@@ -150,7 +150,14 @@ def plot_heatmap(
     ax: Axes,
     corr_dataset: pl.DataFrame,
     title: TextConfig,
+    xticklabels: list[str] = None,
+    xticksrotation: float = 50,
+    haxticks: Literal["center", "right", "left"] = "center",
+    yticklabels: list[str] = None,
+    yticksrotation: float = 0,
+    hayticks: Literal["center", "right", "left"] = "center",
     annot: bool = True,
+    hasMask: bool = True,
     formater: Literal[",.0f", ",.2f", ",.0%", ",.2%"] = ",.2f",
     tooltip_size: float = 10,
     cmap: LinearSegmentedColormap = my_cmap,
@@ -168,23 +175,20 @@ def plot_heatmap(
             tooltip_size (float): Size of tooltip.
             cmap (LinearSegmentedColormap): cmap created by you (optional).
     """
+    mask_value = triu(ones_like(corr_dataset, dtype=bool)) if hasMask else None
 
+    # 2. Agora chame a função limpando a confusão de argumentos
     heatmap(
         data = corr_dataset,
         ax = ax,
-        xticklabels = corr_dataset.columns,
-        yticklabels = corr_dataset.columns,
+        xticklabels = corr_dataset.columns if xticklabels is None else xticklabels,
+        yticklabels = corr_dataset.columns if yticklabels is None else yticklabels,
         annot = annot,
         fmt = formater,
         cmap = cmap,
         annot_kws = {"size": tooltip_size},
         linewidths = .5,
-        mask = triu(
-            ones_like(
-                a = corr_dataset,
-                dtype = bool
-            )
-        ),
+        mask = mask_value,  # <--- Passa o valor já processado
     )
 
     ax.set_title(
@@ -195,14 +199,16 @@ def plot_heatmap(
         pad = title.get("pady", 0),
     )
 
-    ax.set_xticklabels(ax.get_xticklabels(), fontweight = 'bold', rotation = 50, ha = "right")
-    ax.set_yticklabels(ax.get_xticklabels(), fontweight = 'bold', rotation = 0)
+    ax.set_xticklabels(ax.get_xticklabels(), fontweight = 'bold', rotation = xticksrotation, ha = haxticks)
+    ax.set_yticklabels(ax.get_yticklabels(), fontweight = 'bold', rotation = yticksrotation, ha = hayticks)
 
 def plot_histogram(
     ax: Axes,
     values: list[float],
     title: TextConfig,
     color: str,
+    labels: list[str],
+    density: bool = False,
     kde: KDEConfig = {
         "show": True,
         "color": "black"
@@ -232,7 +238,8 @@ def plot_histogram(
     totals, bins, _ = ax.hist(
         x = values,
         bins = bins,
-        color = color
+        color = color,
+        label = labels,
     )
 
     if tooltip.get("show", True):
@@ -302,4 +309,6 @@ def plot_violin(
         fontweight = "bold",
         pad = title.get("pady", 0),
     )
+
+    ax.spines[["top", "right"]].set_visible(False)
 
