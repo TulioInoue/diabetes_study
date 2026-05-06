@@ -7,7 +7,10 @@ from numpy import triu, ones_like, linspace
 from scipy.stats import gaussian_kde
 
 # Setting cmap color:
-my_cmap = LinearSegmentedColormap.from_list("my_custom_red_green_cmap", ["red", "pink", "lightgray", "lime", "green"])
+my_cmap = LinearSegmentedColormap.from_list(
+    "my_custom_red_green_cmap",
+    ["red", "pink", "lightgray", "lime", "green"]
+)
 
 class TextConfig(TypedDict):
     text: str
@@ -84,6 +87,7 @@ def plot_bar(
     x_label: TextConfig,
     y_label: TextConfig,
     tooltip_align: Literal["center", "edge"] = "center",
+    tooltip_rotation: float = 0,
     formater: Literal["{:,.0f}", "{:,.2f}", "{:,.0%}", "{:,.2%}"] = "{:,.0f}",
     width: float = 0.5,
 ) -> None:
@@ -118,6 +122,7 @@ def plot_bar(
         container = bar_plot,
         fmt = formater,
         label_type = tooltip_align,
+        rotation = tooltip_rotation
     )
 
     ax.set_title(
@@ -283,7 +288,17 @@ def plot_violin(
     data: list[float],
     colors: list[str] | None,
     title: TextConfig
-) -> None: 
+) -> None:
+    
+    """
+        Plots a customized violin chart on the provided Matplotlib Axes.
+
+        Args:
+            ax (Axes): The Matplotlib axes object to plot on.
+            data (list[float]): list of values for each column.
+            colors (list[str]): List of colors for each violin plots.
+            title (TextConfig): Dictionary containing 'text', 'size', and 'font'.
+    """
     
     parts = ax.violinplot(
         dataset = data,
