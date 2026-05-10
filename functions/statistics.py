@@ -1,5 +1,7 @@
 import polars as pl
 from sklearn.feature_selection import mutual_info_classif
+from sklearn.model_selection import RandomizedSearchCV
+import joblib
 
 def find_IV(df: pl.DataFrame, target_col: str, feature_cols: list[str]) -> pl.DataFrame:
 
@@ -29,3 +31,39 @@ def find_IV(df: pl.DataFrame, target_col: str, feature_cols: list[str]) -> pl.Da
     }).sort("IMPORTANCE", descending=True)
 
     return result
+
+def getting_best_model(
+    model,
+    X_train: list,
+    y_train: list,
+    path: str,
+    param_grid: dict,
+    scoring,
+    n_iter: int = 50,
+) -> None:
+
+    randomized_search = RandomizedSearchCV(
+        estimator = model,
+        param_distributions = param_grid,
+        n_iter = n_iter,
+        cv = 5,
+        n_jobs = -1,
+        verbose = 2,
+        scoring = scoring,
+        refit = True,
+        error_score = "raise",
+    )
+
+    X_train_fixed = X_train.astype('float32') if hasattr(X_train, 'astype') else X_train
+
+    randomized_search.fit(
+        X = X_train_fixed,
+        y = y_train
+    )
+
+    print(f"Best ROC AUC Score: {randomized_search.best_score_:.4f}")
+
+    joblib.dump(
+        value = randomized_search.best_estimator_,
+        filename = path
+    )
