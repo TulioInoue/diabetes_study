@@ -5,6 +5,7 @@ from seaborn import heatmap
 import polars as pl
 from numpy import triu, ones_like, linspace
 from scipy.stats import gaussian_kde
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 # Setting cmap color:
 my_cmap = LinearSegmentedColormap.from_list(
@@ -88,7 +89,7 @@ def plot_bar(
     y_label: TextConfig,
     tooltip_align: Literal["center", "edge"] = "center",
     tooltip_rotation: float = 0,
-    formater: Literal["{:,.0f}", "{:,.2f}", "{:,.0%}", "{:,.2%}"] = "{:,.0f}",
+    formater: Literal["{:,.0f}", "{:,.2f}", "{:,.3f}", "{:,.4f}", "{:,.0%}", "{:,.2%}"] = "{:,.0f}",
     width: float = 0.5,
 ) -> None:
     
@@ -327,3 +328,31 @@ def plot_violin(
 
     ax.spines[["top", "right"]].set_visible(False)
 
+
+def plot_confusion_matrix(
+    ax: Axes,
+    y_true: list,
+    y_pred: list,
+    title: TextConfig,
+    has_colorbar: bool = True
+) -> None:
+
+    cm_plot = ConfusionMatrixDisplay(
+        confusion_matrix = confusion_matrix(
+            y_true = y_true,
+            y_pred = y_pred
+        )
+    )
+
+    cm_plot.plot(
+        ax = ax,
+        colorbar = has_colorbar
+    )
+
+    ax.set_title(
+        label = title.get("text", "title"),
+        fontsize = title.get("size", 12),
+        fontname = title.get("font", "arial"),
+        fontweight = "bold",
+        pad = title.get("pady", 0),
+    )

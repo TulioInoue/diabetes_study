@@ -1,7 +1,13 @@
 import polars as pl
 from sklearn.feature_selection import mutual_info_classif
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 import joblib
+
+cv = StratifiedKFold(
+    n_splits = 5,
+    shuffle = True,
+    random_state = 42
+)
 
 def find_IV(df: pl.DataFrame, target_col: str, feature_cols: list[str]) -> pl.DataFrame:
 
@@ -46,12 +52,13 @@ def getting_best_model(
         estimator = model,
         param_distributions = param_grid,
         n_iter = n_iter,
-        cv = 5,
+        cv = cv,
         n_jobs = -1,
         verbose = 2,
         scoring = scoring,
         refit = True,
         error_score = "raise",
+        
     )
 
     X_train_fixed = X_train.astype('float32') if hasattr(X_train, 'astype') else X_train
